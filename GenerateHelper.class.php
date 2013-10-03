@@ -1,0 +1,278 @@
+<?php
+
+class GenerateHelper{
+	protected $files;
+	private $classMap = array();
+	
+	public function __construct($dir, $admin, $files){
+		foreach($files as $class=>$file){
+			$this->files[$class] = $dir . DIRECTORY_SEPARATOR . $admin . DIRECTORY_SEPARATOR . $file;
+		}
+	}
+	public function run()
+	{
+		$str = <<<'EOD'
+			<?php die("Access denied!");
+EOD;
+		foreach ($this->files as $class => $file) {
+			$aliasDescription = "";
+			include_once($file);
+			$classReflect = new \ReflectionClass($class);
+			
+			$propertySignatures = array();
+			$publicProperties = $classReflect->getProperties(\ReflectionMethod::IS_PUBLIC);
+			$propertyValues   = $classReflect->getDefaultProperties();
+			foreach ($publicProperties as $property) {
+				$propertyArray = array();
+				//get the name
+				$propertyName = $property->getName();
+				//get the default value
+				$propertyArray['value'] = $propertyValues[$propertyName];
+
+				//create a new docBlock
+				$propertyDoc                       = new \phpDocumentor\Reflection\DocBlock($property);
+				//get the description
+				$propertyArray['description']      = self::stripReturns($propertyDoc->getShortDescription());
+				//get the type
+				$varTag                            = $propertyDoc->getTagsByName("var");
+				$propertyArray['type']             = isset($varTag[0]) ? $varTag[0]->getContent() : '';
+				//add it to the property signatures
+				$propertySignatures[$propertyName] = $propertyArray;
+			}//end foreach $publicProperties
+			
+			$publicMethods    = $classReflect->getMethods(\ReflectionMethod::IS_PUBLIC);
+			$methodSignatures = array();
+			
+			foreach ($publicMethods as $method) {
+				//get the method name
+				$methodName = $method->getName();
+				//skip the magic methods
+				if (preg_match('/^__.*\Z/', $methodName)) {
+					continue;
+				}
+
+				$methodArray         = array();
+				$methodArray['name'] = $methodName;
+
+				//get the docblock
+				$methodDoc = new \phpDocumentor\Reflection\DocBlock($method);
+
+				//get the description from the docblock
+				$methodArray['description'] = self::stripReturns($methodDoc->getShortDescription());
+
+				//get the return type
+				$returnTags            = $methodDoc->getTagsByName("return");
+				$returnType            = isset($returnTags[0]) ? $returnTags[0]->getType() : '';
+				$methodArray['return'] = $returnType;
+
+				//get the params for the method from reflection
+				$methodParams = $method->getParameters();
+				foreach ($methodParams as $param) {
+					$paramArray = array();
+
+					//get the reflect properties name
+					$paramArray['type'] = $param->isArray() ? "array" : '';
+
+					//get the hint, if set
+					$paramArray['classHint'] = $param->getClass() ? $param->getClass()->getName() : '';
+
+					//get the default value
+					if ($param->isOptional()) {
+						$paramArray['optional'] = true;
+						if ($param->isDefaultValueAvailable()) {
+							$paramArray['default'] = $param->getDefaultValue();
+						}
+					}
+					$methodArray['params']["$" . $param->getName()] = $paramArray;
+				}
+
+				//get the params from the docblock
+				$paramTags = $methodDoc->getTagsByName("param");
+				foreach ($paramTags as $param) {
+					$paramName = $param->getVariableName();
+					if (!$paramName) {
+						$methodErrors[$class][$methodName][$paramName] = $param;
+					}
+					If (!isset($methodArray['params'][$paramName])) {
+						$paramArray = array();
+						$methodErrors[$class][$methodName][$paramName] = $param;
+					} else {
+						$paramArray = $methodArray['params'][$paramName];
+					}
+					$paramArray['docType']             = $param->getType();
+					$paramArray['docContent']          = $param->getContent();
+					$paramArray['docName']             = $param->getVariableName();
+					$methodArray['params'][$paramName] = $paramArray;
+				}
+				$methodSignatures[$methodName] = $methodArray;
+			}
+
+			ksort($methodSignatures);
+			$this->classMap[$classReflect->getName()] = $data = array();
+
+			//output the public properties
+			if (isset($propertySignatures))
+			{
+				ksort($propertySignatures);
+				foreach ($propertySignatures as $name => $property) {
+					$default = '';
+					if (array_key_exists('value', $property)) {
+						$default = self::getDefault($property['value']);
+					}
+					$data[] = array(
+						'name' => $name,
+						'type' => $property['type'],
+						'default'=> $default,
+						'desc'=> trim($property['description'])
+					);
+				}
+			}
+			
+			$this->classMap[$classReflect->getName()]['var'] = $data;
+			$data = array();
+			$longest = 0;
+			
+			foreach ($methodSignatures as $sig) {
+				if (strlen($sig['return']) > $longest) {
+					$longest = strlen($sig['return']);
+				}
+			}
+
+			//output the public methods
+
+			foreach ($methodSignatures as $name => $method) {
+				$func = array(
+					'name'=>$name,
+					'type'=>$method['return'],
+					'param' => array(),
+					'desc'=>$method['description']
+				);
+
+				if (isset($method['params'])) {
+					$tmp = array();
+					foreach ($method['params'] as $paramName => $param) {
+						if (!$paramName) {
+							continue;
+						}
+
+						$type = (isset($param['docType']) and !empty($param['type'])) ? $param['type'] : '';
+
+						$type = (empty($type)  and isset($param['docType']) and !empty($param['docType'])) ?
+								$param['docType'] : $type;
+
+						$type = (empty($type)  and isset($param['classHint']) and !empty($param['classHint'])) ?
+								$param['classHint'] : $type;
+						$type = preg_replace('/(\|.*)/', '', $type);
+
+						$default = '';
+						if (isset($param['optional']) and $param['optional']) {
+							if (array_key_exists('default', $param)) {
+								$default = self::getDefault($param['default']);
+							}
+						}
+						$tmp[] = array('name'=>$paramName, 'type'=>$type,'default'=>$default);
+					}
+					$func['param'] = array_merge($func['param'], $tmp);
+				}
+				$data[]  = $func;
+			}
+			$this->classMap[$classReflect->getName()]['function'] = $data;
+  			
+		}
+		
+/* 		echo "<pre>";
+		print_r($this->classMap);
+		die(); */
+		$this->makeHelper();
+		/* $path = dirname(__FILE__) . DIRECTORY_SEPARATOR . '_ide_helper.php';
+		file_put_contents($path, $str); */
+	}
+	protected function makeHelper(){
+		$str = '';
+		
+		foreach($this->classMap as $name => $data){
+			$str .= "class ".$name."{\r\n";
+				foreach($data['var'] as $vars){
+					if($vars['desc'] != '' || $vars['type']!=''){
+						$str.="\t/** \r\n";
+					}
+					if($vars['desc']!=''){
+						$str.="\t\t".$vars['desc']."\r\n";
+					}
+					if($vars['type']!=''){
+						$str.="\t\t@var ".$vars['type']."\r\n";
+					}
+					if($vars['desc'] != '' || $vars['type']!=''){
+						$str.="\t*/\r\n";
+					}
+					$str .= "\tvar \$".$vars['name'];
+					if($vars['default']!=''){
+						$str .= " = ".$vars['default'];
+					}
+					$str .= ";\r\n";
+				}
+				foreach($data['function'] as $func){
+					$pname = array();
+					$comment = '';
+					
+					foreach($func['param'] as $param){
+						$tmp = $param['name'];
+						if($param['default']!=''){
+							$tmp .= "=".$param['default'];
+						}
+						if($param['type']!=''){
+							$comment .= "\t\t@param ".$param['type']." ".$param['name']."\r\n";
+						}
+						$pname[] = $tmp;
+					}
+					if($comment!='' || $func['desc']!='' || $func['type']!=''){
+						$str .= "\t/**\r\n";
+						if($func['desc']!=''){
+							$str .= "\t\t".$func['desc']."\r\n";
+						}
+						if($comment!=''){
+							$str .= "\r\n".$comment."\r\n";
+						}
+						if($func['type']!=''){
+							$str .= "\t\t@return ".$func['type']."\r\n";
+						}
+						$str .= "\t*/\r\n";
+					}
+					$str .= "\tpublic function ".$func['name']."(".implode(", ", $pname)."){}\r\n\r\n";
+				}
+			$str .= "}\r\n";
+		}
+		echo $str;
+	}
+	/**
+	 * Return a string as the default value
+	 * @param mixed $value
+	 *
+	 * @return string
+	 */
+	protected static function getDefault($value)
+	{
+		if (is_array($value)) {
+			$value   = isset($value[0]) ? $value[0] : '';
+			return "array(" . $value . ")";
+		}
+		if (is_bool($value)) {
+			return ($value) ? "true" : "false";
+		}
+		if (is_null($value)) {
+			return "null";
+		}
+		return '"' . $value . '"';
+	}
+	
+	/**
+	 * Strips hard returns in the description
+	 * @param string $value
+	 *
+	 * @return string
+	 */
+	protected static function stripReturns($value)
+	{
+		return trim(preg_replace('/\s+/', ' ', $value));
+	}
+}

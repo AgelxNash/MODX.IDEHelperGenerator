@@ -1,8 +1,7 @@
-IDE Helper
+Generator IDE Helper for MODX Evolution
 =========
-IDE Helper это файл помощник для IDE PhpStorm, SblimeText 2 и возможно других динамических IDE.
+IDE Helper это файл помощник для IDE PhpStorm, SblimeText 2 и возможно других динамических IDE. 
 
--  **[Laravel](https://github.com/jonphipps/laravel4-idehelper-generator)**. Автоматическая генерация файла _ide_helper.php на событии post-update-cmd в composer.
-- **[MODX Evolution](https://github.com/AgelxNash/IDEHelper/MODX%20Evolution/_ide_helper.php)**. Учитывая, что код очень плохо документирован, файл редактируется по мере появления такой возможности
-- **MODX Revolution**.
-- **ClipperCMS**.
+На создание файла вдохновил генератор под [Laravel 4](https://github.com/jonphipps/laravel4-idehelper-generator). Но т.к. исходный код MODX Evolution по большому счету - говно, было решено пойти путем создания псевдоклассов. Так, как это реализовал [andrew13](https://github.com/andrew13) в демоприложении [Laravel 4 Bootstrap Starter Site](https://github.com/andrew13/Laravel-4-Bootstrap-Starter-Site/blob/master/_ide_helper.php)
+
+Учитывая тот факт, что API MODX Evolution может отличаться от версии к версии *(особенно если мы говорим про [ClipperCMS](https://github.com/ClipperCMS/ClipperCMS))*, то необходим инструмент поддерживающий кастомизацию автоматически создаваемого IDE Helper файла на лету, в зависимости от версии MODX для которой этот файл создается.
