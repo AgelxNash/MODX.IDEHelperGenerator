@@ -40,7 +40,7 @@ return array(
             'logHandler' => 'includes/log.class.inc.php',
             'Paging' => 'includes/paginate.inc.php',
             'TemplateRules' => 'includes/template_rules.class.inc.php',
-            'udperms' => 'user_documents_permissions.class.php',
+            'udperms' => 'includes/user_documents_permissions.class.php',
 
             'Files' => 'media/ImageEditor/Classes/Files.php',
             'Image_Transform_Driver_GD' => 'media/ImageEditor/Classes/GD.php',
