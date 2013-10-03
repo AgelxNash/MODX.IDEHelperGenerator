@@ -170,13 +170,14 @@ class GenerateHelper{
 					}
 					$func['param'] = array_merge($func['param'], $tmp);
 				}
-				$data[]  = $func;
+				$data[$name]  = $func;
 			}
 			$this->classMap[$classReflect->getName()]['function'] = $data;
             $parent = $classReflect->getParentClass();
             $this->classMap[$classReflect->getName()]['parent'] = ($parent) ? $parent->getName() : '';
 		}
         $this->classMap = array_replace_recursive($this->classMap, $this->customMap);
+
 		return $this->makeHelper();
 	}
 
@@ -224,14 +225,16 @@ if (!defined('MODX_MANAGER_URL')) define('MODX_MANAGER_URL', 'site_url/manager/'
 					$comment = '';
 					
 					foreach($func['param'] as $param){
-						$tmp = $param['name'];
-						if($param['default']!=''){
-							$tmp .= "=".$param['default'];
-						}
-						if($param['type']!=''){
-							$comment .= "\t\t@param ".$param['type']." ".$param['name']."\r\n";
-						}
-						$pname[] = $tmp;
+                        if(!empty($param['name'])){
+                            $tmp = $param['name'];
+                            if($param['default']!=''){
+                                $tmp .= "=".$param['default'];
+                            }
+                            if($param['type']!=''){
+                                $comment .= "\t\t@param ".$param['type']." ".$param['name']."\r\n";
+                            }
+                            $pname[] = $tmp;
+                        }
 					}
 					if($comment!='' || $func['desc']!='' || $func['type']!=''){
 						$str .= "\t/**\r\n";
