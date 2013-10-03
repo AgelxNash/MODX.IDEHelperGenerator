@@ -3,19 +3,14 @@
 class GenerateHelper{
 	protected $files;
 	private $classMap = array();
-	
-	public function __construct($dir, $admin, $files){
-		foreach($files as $class=>$file){
-			$this->files[$class] = $dir . DIRECTORY_SEPARATOR . $admin . DIRECTORY_SEPARATOR . $file;
-		}
+	private $customMap = array();
+	public function __construct($files, $custom){
+		$this->files = $files;
+        $this->customMap = $custom;
 	}
 	public function run()
 	{
-		$str = <<<'EOD'
-			<?php die("Access denied!");
-EOD;
 		foreach ($this->files as $class => $file) {
-			$aliasDescription = "";
 			include_once($file);
 			$classReflect = new \ReflectionClass($class);
 			
@@ -119,7 +114,7 @@ EOD;
 					if (array_key_exists('value', $property)) {
 						$default = self::getDefault($property['value']);
 					}
-					$data[] = array(
+					$data[$name] = array(
 						'name' => $name,
 						'type' => $property['type'],
 						'default'=> $default,
@@ -129,6 +124,7 @@ EOD;
 			}
 			
 			$this->classMap[$classReflect->getName()]['var'] = $data;
+
 			$data = array();
 			$longest = 0;
 			
@@ -177,21 +173,33 @@ EOD;
 				$data[]  = $func;
 			}
 			$this->classMap[$classReflect->getName()]['function'] = $data;
-  			
+            $parent = $classReflect->getParentClass();
+            $this->classMap[$classReflect->getName()]['parent'] = ($parent) ? $parent->getName() : '';
 		}
-		
-/* 		echo "<pre>";
-		print_r($this->classMap);
-		die(); */
-		$this->makeHelper();
-		/* $path = dirname(__FILE__) . DIRECTORY_SEPARATOR . '_ide_helper.php';
-		file_put_contents($path, $str); */
+        $this->classMap = array_replace_recursive($this->classMap, $this->customMap);
+		return $this->makeHelper();
 	}
+
 	protected function makeHelper(){
-		$str = '';
-		
+        $str = "<?php die(\"Access denied!\");
+
+if (!defined('MGR_DIR')) define('MGR_DIR', 'manager');
+if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', 'base_path');
+if (!defined('MODX_BASE_URL')) define('MODX_BASE_URL', 'base_url');
+if (!defined('MODX_SITE_URL')) define('MODX_SITE_URL', 'site_url');
+if (!defined('MODX_MANAGER_PATH')) define('MODX_MANAGER_PATH', 'base_path/manager/');
+if (!defined('MODX_MANAGER_URL')) define('MODX_MANAGER_URL', 'site_url/manager/');
+
+\$modx = new DocumentParser();
+
+";
+
 		foreach($this->classMap as $name => $data){
-			$str .= "class ".$name."{\r\n";
+            $str .= "class ".$name;
+            if(!empty($data['parent'])){
+                $str .= " extends ".$data['parent'];
+            }
+            $str .= "{\r\n";
 				foreach($data['var'] as $vars){
 					if($vars['desc'] != '' || $vars['type']!=''){
 						$str.="\t/** \r\n";
@@ -242,8 +250,11 @@ EOD;
 				}
 			$str .= "}\r\n";
 		}
-		echo $str;
+		return $this->save($str);
 	}
+    protected function save($str){
+        return file_put_contents("_ide_helper.php", $str);
+    }
 	/**
 	 * Return a string as the default value
 	 * @param mixed $value

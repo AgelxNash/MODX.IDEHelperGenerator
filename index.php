@@ -24,15 +24,30 @@ if(!isset($config['classMap']) || !is_array($config['classMap'])){
 		'DocumentParser'=>'includes/document.parser.class.inc.php',
 	);
 }
+error_reporting(E_ALL);
+ini_set('display_errors','On');
+
+if (!defined('MGR_DIR')) define('MGR_DIR', $config['adminFolder']);
+if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', $config['modxFolder'] . DIRECTORY_SEPARATOR);
+if (!defined('MODX_MANAGER_PATH')) define('MODX_MANAGER_PATH', MODX_BASE_PATH . MGR_DIR . DIRECTORY_SEPARATOR);
+if (!defined('MODX_API_MODE')) define('MODX_API_MODE', true);
+if (!defined('MAGPIE_DIR')) {define('MAGPIE_DIR', MODX_MANAGER_PATH . "media". DIRECTORY_SEPARATOR ."rss" . DIRECTORY_SEPARATOR);}
 
 $customPHPdoc = "phpdoc" . DIRECTORY_SEPARATOR . $config['name'] . "_". $config['version'] . ".php";
-if(!file_exists($customPHPdoc)){
+
+if(file_exists($customPHPdoc)){
 	$customPHPdoc = include_once $customPHPdoc;
 }
 if(!is_array($customPHPdoc)){
 	$customPHPdoc = array();
 }
+$incPath = str_replace("\\","/", MODX_MANAGER_PATH);
+set_include_path(get_include_path() . PATH_SEPARATOR . $incPath);
 
-$out = new GenerateHelper($config['modxFolder'], $config['adminFolder'], $config['classMap'], $customPHPdoc);
-$out->run();
+
+$incPath = str_replace("\\","/", MODX_MANAGER_PATH."includes/"); // Mod by Raymond
+set_include_path(get_include_path() . PATH_SEPARATOR . $incPath);
+
+$out = new GenerateHelper($config['classMap'], $customPHPdoc);
+echo $out->run();
 
