@@ -1,8 +1,13 @@
 <?php
-
 return array(
     'DocumentParser' => array(
         'var' => array(
+            'old' => array(
+                'desc' => 'deprecated functions',
+                'type' => '\OldFunctions',
+                'name' => 'old',
+                'default' => 'null'
+            ),
             'db' => array(
                 'type' => '\DBAPI'
             ),
@@ -42,7 +47,8 @@ return array(
                     )
                 )
             ),
-        )
+        ),
+        'parent' => 'OldFunctions'
     ),
     'DBAPI' => array(
         'function' => array(

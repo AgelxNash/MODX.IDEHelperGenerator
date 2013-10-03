@@ -55,6 +55,7 @@ return array(
             'Snoopy' => 'media/rss/extlib/Snoopy.class.inc',
             'RSSCache' => 'media/rss/rss_cache.inc',
             'MagpieRSS' => 'media/rss/rss_parse.inc',
+            'OldFunctions' => 'includes/extenders/deprecated.functions.inc.php',
 		),
 
 	);
