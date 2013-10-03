@@ -1,4 +1,17 @@
 <?php
+global $info;
+
+if (!defined('MGR_DIR')) define('MGR_DIR', $info['coreFolder']);
+if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', $info['modxFolder'] . DIRECTORY_SEPARATOR);
+if (!defined('MODX_MANAGER_PATH')) define('MODX_MANAGER_PATH', MODX_BASE_PATH . MGR_DIR . DIRECTORY_SEPARATOR);
+if (!defined('MODX_API_MODE')) define('MODX_API_MODE', true);
+if (!defined('MAGPIE_DIR')) {define('MAGPIE_DIR', MODX_MANAGER_PATH . "media". DIRECTORY_SEPARATOR ."rss" . DIRECTORY_SEPARATOR);}
+
+$incPath = str_replace("\\","/", MODX_MANAGER_PATH);
+set_include_path(get_include_path() . PATH_SEPARATOR . $incPath);
+
+$incPath = str_replace("\\","/", MODX_MANAGER_PATH."includes/"); // Mod by Raymond
+set_include_path(get_include_path() . PATH_SEPARATOR . $incPath);
 
 /**
  * @TODO некоторые файлы содержат тупо функции. Их тоже можно включить в Helper
@@ -43,5 +56,5 @@ return array(
             'RSSCache' => 'media/rss/rss_cache.inc',
             'MagpieRSS' => 'media/rss/rss_parse.inc',
 		),
-		'version' => '1.0.12'
+
 	);

@@ -4,9 +4,12 @@ class GenerateHelper{
 	protected $files;
 	private $classMap = array();
 	private $customMap = array();
-	public function __construct($files, $custom){
+    private $template = '';
+
+	public function __construct($files, $custom, $template){
 		$this->files = $files;
         $this->customMap = $custom;
+        $this->template = $template;
 	}
 	public function run()
 	{
@@ -182,18 +185,8 @@ class GenerateHelper{
 	}
 
 	protected function makeHelper(){
-        $str = "<?php die(\"Access denied!\");
-
-if (!defined('MGR_DIR')) define('MGR_DIR', 'manager');
-if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', 'base_path');
-if (!defined('MODX_BASE_URL')) define('MODX_BASE_URL', 'base_url');
-if (!defined('MODX_SITE_URL')) define('MODX_SITE_URL', 'site_url');
-if (!defined('MODX_MANAGER_PATH')) define('MODX_MANAGER_PATH', 'base_path/manager/');
-if (!defined('MODX_MANAGER_URL')) define('MODX_MANAGER_URL', 'site_url/manager/');
-
-\$modx = new DocumentParser();
-
-";
+        $str = "<?php die(\"Access denied!\");\r\n\r\n";
+        $str .= $this->template."\r\n\r\n";
 
 		foreach($this->classMap as $name => $data){
             $str .= "class ".$name;
