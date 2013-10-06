@@ -199,10 +199,10 @@ class GenerateHelper{
 						$str.="\t/** \r\n";
 					}
 					if($vars['desc']!=''){
-						$str.="\t\t".$vars['desc']."\r\n";
+						$str.="\t* ".$vars['desc']."\r\n";
 					}
 					if($vars['type']!=''){
-						$str.="\t\t@var ".$vars['type']."\r\n";
+						$str.="\t* @var ".$vars['type']."\r\n";
 					}
 					if($vars['desc'] != '' || $vars['type']!=''){
 						$str.="\t*/\r\n";
@@ -224,7 +224,7 @@ class GenerateHelper{
                                 $tmp .= "=".$param['default'];
                             }
                             if($param['type']!=''){
-                                $comment .= "\t\t@param ".$param['type']." ".$param['name']."\r\n";
+                                $comment .= "\t* @param ".$param['type']." ".$param['name']."\r\n";
                             }
                             $pname[] = $tmp;
                         }
@@ -232,13 +232,13 @@ class GenerateHelper{
 					if($comment!='' || $func['desc']!='' || $func['type']!=''){
 						$str .= "\t/**\r\n";
 						if($func['desc']!=''){
-							$str .= "\t\t".$func['desc']."\r\n";
+							$str .= "\t* ".$func['desc']."\r\n";
 						}
 						if($comment!=''){
-							$str .= "\r\n".$comment."\r\n";
+						    $str .= "\t*\r\n".$comment."\t*\r\n";
 						}
 						if($func['type']!=''){
-							$str .= "\t\t@return ".$func['type']."\r\n";
+							$str .= "\t* @return ".$func['type']."\r\n";
 						}
 						$str .= "\t*/\r\n";
 					}

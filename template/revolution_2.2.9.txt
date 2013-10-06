@@ -1,0 +1,36 @@
+if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', 'base_path');
+if (!defined('MODX_BASE_URL')) define('MODX_BASE_URL', '/');
+
+if (!defined('MODX_CORE_PATH')) define('MODX_CORE_PATH', MODX_BASE_PATH . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR);
+if (!defined('MODX_CONFIG_KEY')) define('MODX_CONFIG_KEY', 'config');
+
+if (!defined('MODX_PROCESSORS_PATH')) define('MODX_PROCESSORS_PATH', MODX_CORE_PATH . DIRECTORY_SEPARATOR . 'model/modx/processors/' . DIRECTORY_SEPARATOR );
+
+if (!defined('MODX_CONNECTORS_PATH')) define('MODX_CONNECTORS_PATH', MODX_BASE_PATH . DIRECTORY_SEPARATOR . 'connectors' . DIRECTORY_SEPARATOR);
+if (!defined('MODX_CONNECTORS_URL')) define('MODX_CONNECTORS_URL', '/connectors/');
+
+if (!defined('MODX_MANAGER_PATH')) define('MODX_MANAGER_PATH', MODX_BASE_PATH . 'manager' . DIRECTORY_SEPARATOR);
+if (!defined('MODX_MANAGER_URL')) define('MODX_MANAGER_URL', '/manager/');
+
+if (!defined('MODX_API_MODE')) define('MODX_API_MODE', true);
+
+if (!defined('MODX_URL_SCHEME'))  define('MODX_URL_SCHEME', 'http://');
+if (!defined('MODX_HTTP_HOST')) define('MODX_HTTP_HOST', 'agel-nash.ru');
+if (!defined('MODX_SITE_URL')) define('MODX_SITE_URL', MODX_URL_SCHEME . MODX_HTTP_HOST . MODX_BASE_URL);
+
+if (!defined('MODX_ASSETS_PATH')) define('MODX_ASSETS_PATH', MODX_BASE_PATH . 'assets');
+if (!defined('MODX_ASSETS_URL')) define('MODX_ASSETS_URL', '/assets/');
+
+if (!defined('MODX_LOG_LEVEL_FATAL')) define('MODX_LOG_LEVEL_FATAL', 0);
+if (!defined('MODX_LOG_LEVEL_ERROR')) define('MODX_LOG_LEVEL_ERROR', 1);
+if (!defined('MODX_LOG_LEVEL_WARN')) define('MODX_LOG_LEVEL_WARN', 2);
+if (!defined('MODX_LOG_LEVEL_INFO')) define('MODX_LOG_LEVEL_INFO', 3);
+if (!defined('MODX_LOG_LEVEL_DEBUG')) define('MODX_LOG_LEVEL_DEBUG', 4);
+
+if (!defined('MODX_CACHE_DISABLED')) define('MODX_CACHE_DISABLED', false);
+
+if (!defined('XPDO_PHP_VERSION')) define('XPDO_PHP_VERSION', phpversion());
+if (!defined('XPDO_CLI_MODE')) define('XPDO_CLI_MODE', false);
+if (!defined('XPDO_CORE_PATH')) define('XPDO_CORE_PATH', MODX_CORE_PATH . 'xpdo' . DIRECTORY_SEPARATOR);
+
+$modx = new modX();
