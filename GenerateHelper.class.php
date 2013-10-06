@@ -6,11 +6,49 @@ class GenerateHelper{
 	private $customMap = array();
     private $template = '';
 
-	public function __construct($files, $custom, $template){
-		$this->files = $files;
-        $this->customMap = $custom;
-        $this->template = $template;
-	}
+    public function setFiles($files){
+        $this->files = $files;
+    }
+    public function setMap($data){
+        $this->customMap = $data;
+    }
+    public function setTemplate($tpl){
+        $this->template = $tpl;
+    }
+    public static function getClassList($files){
+        $out = array();
+        $base = get_declared_classes();
+        foreach($files as $item){
+            include_once($item);
+            $tmp = array_diff(get_declared_classes(),$base);
+            foreach($tmp as $class){
+                if(!isset($out[$class])){
+                    $out[$class] = $item;
+                }
+            }
+        }
+        return $out;
+    }
+    public static function findFile($dir){
+        $class = array();
+        if ($fh = opendir($dir)) {
+            while(false !== ($elem = readdir($fh))) {
+                switch(true){
+                    case ($elem!='.' && $elem!='..' && is_dir($dir.$elem)):{
+                        $class = array_merge(self::findFile($dir.$elem."/"), $class);
+                        break;
+                    }
+                    case is_file($dir.$elem):{
+                        $class[] = $dir.$elem;
+                        break;
+                    }
+                }
+            }
+            closedir($fh);
+        }
+        return $class;
+    }
+
 	public function run()
 	{
 		foreach ($this->files as $class => $file) {

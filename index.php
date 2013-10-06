@@ -5,6 +5,8 @@ ini_set('display_errors','On');
 require_once 'vendor/autoload.php';
 require_once 'GenerateHelper.class.php';
 
+$IDEHelper = new GenerateHelper();
+
 if(file_exists("config.php")){
     $info = include_once dirname(__FILE__) . DIRECTORY_SEPARATOR . "config.php";
 }else{
@@ -31,6 +33,7 @@ if(!is_array($config)){
 if(!isset($config['classMap']) || !is_array($config['classMap'])){
 	die('Empty classMap');
 }
+$IDEHelper->setFiles($config['classMap']);
 
 $customPHPdoc = dirname(__FILE__) . DIRECTORY_SEPARATOR . "phpdoc" . DIRECTORY_SEPARATOR . $info['name'] . "_" . $info['version'] . ".php";
 if(file_exists($customPHPdoc)){
@@ -39,9 +42,11 @@ if(file_exists($customPHPdoc)){
 if(!is_array($customPHPdoc)){
 	$customPHPdoc = array();
 }
+$IDEHelper->setMap($customPHPdoc);
 
 $template = dirname(__FILE__) . DIRECTORY_SEPARATOR . "template" . DIRECTORY_SEPARATOR . $info['name'] . "_" . $info['version'] . ".txt";
 $template = (file_exists($template)) ? file_get_contents($template) : '';
-$out = new GenerateHelper($config['classMap'], $customPHPdoc, $template);
-echo $out->run();
+$IDEHelper->setTemplate($template);
+
+echo $IDEHelper->run();
 
