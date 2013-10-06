@@ -4,5 +4,4 @@ composer.json
 composer.lock
 composer.phar
 /modx
-_ide_helper.php
 config.php
