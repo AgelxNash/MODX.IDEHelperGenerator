@@ -216,7 +216,9 @@ class GenerateHelper{
 			$this->classMap[$classReflect->getName()]['function'] = $data;
             $parent = $classReflect->getParentClass();
             $this->classMap[$classReflect->getName()]['parent'] = ($parent) ? $parent->getName() : '';
-            $this->classMap[$classReflect->getName()]['interface'] = $classReflect->getInterfaceNames();
+            $this->classMap[$classReflect->getName()]['implements'] = $classReflect->getInterfaceNames();
+            $this->classMap[$classReflect->getName()]['abstract'] = $classReflect->isAbstract();
+            $this->classMap[$classReflect->getName()]['interface'] = $classReflect->isInterface();
 		}
         $this->classMap = array_replace_recursive($this->classMap, $this->customMap);
 
@@ -228,68 +230,103 @@ class GenerateHelper{
         $str .= $this->template."\r\n\r\n";
 
 		foreach($this->classMap as $name => $data){
-            $str .= "class ".$name;
+            switch(true){
+                case (!empty($data['interface'])):{
+                    $str .= 'interface';
+                    break;
+                }
+                case (!empty($data['abstract'])):{
+                    $str .= 'abstract class';
+                    break;
+                }
+                default:{
+                    $str .= 'class';
+                }
+            }
+            $str .= " ".$name;
             if(!empty($data['parent'])){
                 $str .= " extends ".$data['parent'];
+                $parent = $data['parent'];
+            }else{
+                $parent = '';
             }
-            if(!empty($data['interface'])){
-                $str .= " implements ".implode(",", array_values($data['interface']));
+
+            if(!empty($data['implements'])){
+                $str .= " implements ".implode(",", array_values($data['implements']));
             }
             $str .= "{\r\n";
 				foreach($data['var'] as $vars){
-					if($vars['desc'] != '' || $vars['type']!=''){
-						$str.="\t/** \r\n";
-					}
-					if($vars['desc']!=''){
-						$str.="\t* ".$vars['desc']."\r\n";
-					}
-					if($vars['type']!=''){
-						$str.="\t* @var ".$vars['type']."\r\n";
-					}
-					if($vars['desc'] != '' || $vars['type']!=''){
-						$str.="\t*/\r\n";
-					}
-					$str .= "\tvar \$".$vars['name'];
-					if($vars['default']!=''){
-						$str .= " = ".$vars['default'];
-					}
-					$str .= ";\r\n";
+                    if($this->checkParentVars($parent, $vars['name'])){
+                        if($vars['desc'] != '' || $vars['type']!=''){
+                            $str.="\t/** \r\n";
+                        }
+                        if($vars['desc']!=''){
+                            $str.="\t* ".$vars['desc']."\r\n";
+                        }
+                        if($vars['type']!=''){
+                            $str.="\t* @var ".$vars['type']."\r\n";
+                        }
+                        if($vars['desc'] != '' || $vars['type']!=''){
+                            $str.="\t*/\r\n";
+                        }
+                        $str .= "\tvar \$".$vars['name'];
+                        if($vars['default']!=''){
+                            $str .= " = ".$vars['default'];
+                        }
+                        $str .= ";\r\n";
+                    }
 				}
 				foreach($data['function'] as $func){
-					$pname = array();
-					$comment = '';
-					
-					foreach($func['param'] as $param){
-                        if(!empty($param['name'])){
-                            $tmp = $param['name'];
-                            if($param['default']!=''){
-                                $tmp .= "=".$param['default'];
+                    if($this->checkParentFunction($parent, $func['name'])){
+                        $pname = array();
+                        $comment = '';
+
+                        foreach($func['param'] as $param){
+                            if(!empty($param['name'])){
+                                $tmp = $param['name'];
+                                if($param['default']!=''){
+                                    $tmp .= "=".$param['default'];
+                                }
+                                if($param['type']!=''){
+                                    $comment .= "\t* @param ".$param['type']." ".$param['name']."\r\n";
+                                }
+                                $pname[] = $tmp;
                             }
-                            if($param['type']!=''){
-                                $comment .= "\t* @param ".$param['type']." ".$param['name']."\r\n";
-                            }
-                            $pname[] = $tmp;
                         }
-					}
-					if($comment!='' || $func['desc']!='' || $func['type']!=''){
-						$str .= "\t/**\r\n";
-						if($func['desc']!=''){
-							$str .= "\t* ".$func['desc']."\r\n";
-						}
-						if($comment!=''){
-						    $str .= "\t*\r\n".$comment."\t*\r\n";
-						}
-						if($func['type']!=''){
-							$str .= "\t* @return ".$func['type']."\r\n";
-						}
-						$str .= "\t*/\r\n";
-					}
-					$str .= "\tpublic function ".$func['name']."(".implode(", ", $pname)."){}\r\n\r\n";
+                        if($comment!='' || $func['desc']!='' || $func['type']!=''){
+                            $str .= "\t/**\r\n";
+                            if($func['desc']!=''){
+                                $str .= "\t* ".$func['desc']."\r\n";
+                            }
+                            if($comment!=''){
+                                $str .= "\t*\r\n".$comment."\t*\r\n";
+                            }
+                            if($func['type']!=''){
+                                $str .= "\t* @return ".$func['type']."\r\n";
+                            }
+                            $str .= "\t*/\r\n";
+                        }
+                        $str .= "\tpublic function ".$func['name']."(".implode(", ", $pname)."){}\r\n\r\n";
+                    }
 				}
 			$str .= "}\r\n";
 		}
 		return $this->save($str);
 	}
+    public function checkParentFunction($parent, $name){
+        return $this->checkParent($parent, 'function', $name);
+    }
+    public function checkParentVars($parent, $name){
+        return $this->checkParent($parent, 'var', $name);
+    }
+
+    public function checkParent($parent, $type, $name){
+        $flag = true;
+        if(!empty($parent) && isset($this->classMap[$parent], $this->classMap[$parent][$type], $this->classMap[$parent][$type][$name])){
+                $flag = false;
+        }
+        return $flag;
+    }
     protected function save($str){
         return file_put_contents("_ide_helper.php", $str);
     }
