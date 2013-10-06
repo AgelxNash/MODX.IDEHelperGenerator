@@ -1,11 +1,15 @@
 <?php
 
 return array(
-    'DocumentParser' => array(
+    'Core' => array(
         'var' => array(
             'db' => array(
                 'type' => '\DBAPI'
             ),
+        )
+    ),
+    'DocumentParser' => array(
+        'var' => array(
             'event' => array(
                 'type' => '\SystemEvent'
             ),
