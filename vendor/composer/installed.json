@@ -75,7 +75,7 @@
                 "dev-master": "0.9-dev"
             }
         },
-        "installation-source": "source",
+        "installation-source": "dist",
         "autoload": {
             "psr-0": {
                 "PHPParser": "lib/"
@@ -123,7 +123,7 @@
         },
         "time": "2013-09-16 19:51:25",
         "type": "library",
-        "installation-source": "source",
+        "installation-source": "dist",
         "autoload": {
             "psr-0": {
                 "phpDocumentor": [
