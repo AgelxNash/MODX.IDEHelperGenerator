@@ -49,7 +49,7 @@ class GenerateHelper{
         return $class;
     }
 
-	public function run()
+	public function run($FName_IDEHelper)
 	{
 		foreach ($this->files as $class => $file) {
 			include_once($file);
@@ -222,10 +222,10 @@ class GenerateHelper{
 		}
         $this->classMap = array_replace_recursive($this->classMap, $this->customMap);
 
-		return $this->makeHelper();
+		return $this->makeHelper($FName_IDEHelper);
 	}
 
-	protected function makeHelper(){
+	protected function makeHelper($FName_IDEHelper){
         $str = "<?php die(\"Access denied!\");\r\n\r\n";
         $str .= $this->template."\r\n\r\n";
 
@@ -311,7 +311,7 @@ class GenerateHelper{
 				}
 			$str .= "}\r\n";
 		}
-		return $this->save($str);
+		return $this->save($str, $FName_IDEHelper);
 	}
     public function checkParentFunction($parent, $name){
         return $this->checkParent($parent, 'function', $name);
@@ -327,8 +327,15 @@ class GenerateHelper{
         }
         return $flag;
     }
-    protected function save($str){
-        return file_put_contents("_ide_helper.php", $str);
+    protected function save($str, $FName_IDEHelper = array()){
+        $dir = dirname(__FILE__) . '/out';
+        foreach($FName_IDEHelper as $folder){
+            if(!file_exists($dir."/".$folder)){
+                $dir = $dir."/".$folder;
+                mkdir($dir);
+            }
+        }
+        return file_put_contents("{$dir}/_ide_helper.php", $str);
     }
 	/**
 	 * Return a string as the default value

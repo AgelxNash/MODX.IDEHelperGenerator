@@ -48,5 +48,5 @@ $template = dirname(__FILE__) . DIRECTORY_SEPARATOR . "template" . DIRECTORY_SEP
 $template = (file_exists($template)) ? file_get_contents($template) : '';
 $IDEHelper->setTemplate($template);
 
-echo $IDEHelper->run();
+echo $IDEHelper->run(array($info['name'], $info['version']));
 
