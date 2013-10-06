@@ -178,6 +178,7 @@ class GenerateHelper{
 			$this->classMap[$classReflect->getName()]['function'] = $data;
             $parent = $classReflect->getParentClass();
             $this->classMap[$classReflect->getName()]['parent'] = ($parent) ? $parent->getName() : '';
+            $this->classMap[$classReflect->getName()]['interface'] = $classReflect->getInterfaceNames();
 		}
         $this->classMap = array_replace_recursive($this->classMap, $this->customMap);
 
@@ -192,6 +193,9 @@ class GenerateHelper{
             $str .= "class ".$name;
             if(!empty($data['parent'])){
                 $str .= " extends ".$data['parent'];
+            }
+            if(!empty($data['interface'])){
+                $str .= " implements ".implode(",", array_values($data['interface']));
             }
             $str .= "{\r\n";
 				foreach($data['var'] as $vars){
