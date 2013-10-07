@@ -15,7 +15,7 @@ IDE Helper это файл помощник для IDE PhpStorm, SblimeText 2 и
 
 ### Полезные ссылки
 ---------
-* [Демонстрация работы с IDE Helper'ом](http://www.youtube.com/watch?v=HowzMZlFVsQ)
+* [Демонстрация работы с IDE Helper'ом](http://www.youtube.com/watch?v=rg_EzIAxyew)
 
 ### Автор
 ---------
