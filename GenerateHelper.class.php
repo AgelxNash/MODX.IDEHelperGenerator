@@ -1,5 +1,4 @@
 <?php
-
 class GenerateHelper{
 	protected $files;
 	private $classMap = array();
@@ -226,7 +225,7 @@ class GenerateHelper{
 	}
 
 	protected function makeHelper($FName_IDEHelper){
-        $str = "<?php die(\"Access denied!\");\r\n\r\n";
+        $str = "<?php die(\"IDE Helper for MODX\");\r\n\r\n";
         $str .= $this->template."\r\n\r\n";
 
 		foreach($this->classMap as $name => $data){
@@ -330,8 +329,8 @@ class GenerateHelper{
     protected function save($str, $FName_IDEHelper = array()){
         $dir = dirname(__FILE__) . '/out';
         foreach($FName_IDEHelper as $folder){
-            if(!file_exists($dir."/".$folder)){
-                $dir = $dir."/".$folder;
+            $dir = $dir."/".$folder;
+            if(!file_exists($dir)){
                 mkdir($dir);
             }
         }

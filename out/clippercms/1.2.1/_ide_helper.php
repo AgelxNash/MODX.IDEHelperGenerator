@@ -1,4 +1,4 @@
-<?php die("Access denied!");
+<?php die("IDE Helper for MODX");
 
 if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', 'base_path');
 if (!defined('MODX_BASE_URL')) define('MODX_BASE_URL', 'base_url');

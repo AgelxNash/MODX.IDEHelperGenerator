@@ -1,4 +1,4 @@
-<?php die("Access denied!");
+<?php die("IDE Helper for MODX");
 
 if (!defined('MGR_DIR')) define('MGR_DIR', 'manager');
 if (!defined('MODX_BASE_PATH')) define('MODX_BASE_PATH', 'base_path');
